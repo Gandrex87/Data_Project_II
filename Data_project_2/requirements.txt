@@ -1,6 +1,0 @@
-geopandas
-folium
-simplekml
-shapely
-xml
-

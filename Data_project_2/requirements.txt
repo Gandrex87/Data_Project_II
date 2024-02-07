@@ -6,4 +6,9 @@ streamlit_folium==0.18.0
 google-cloud-pubsub==2.18.1
 faker==21.0.0
 argparse==1.4.0
+time
+threading
+random
+xml.etree.ElementTree
+os
 

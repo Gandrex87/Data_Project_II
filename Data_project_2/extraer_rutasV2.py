@@ -7,66 +7,111 @@ import xml.etree.ElementTree as ET
 import time
 import threading
 import random
+import argparse
+import logging
 
-# Configura el cliente de Pub/Sub
-publisher = pubsub_v1.PublisherClient()
-# ojo - Reemplazar 'your-project-id' y 'topic-name' Y No olvidar generar credenciales de la service account.
-topic_path = publisher.topic_path('civic-summer-413119', 'pro-bucket1')
+#Input arguments
+parser = argparse.ArgumentParser(description=('People Data Generator'))
 
-def publicar_coordenada(coordenada, car_id, route_id):
-    # Incluir identificadores en el mensaje
-    message_data = {
-        "car_id": car_id,
-        "route_id": route_id,
-        "lat": coordenada[0],
-        "lon": coordenada[1]
-    }
-    # Convertir el mensaje a una cadena JSON y luego a bytes
-    data_bytes = json.dumps(message_data).encode("utf-8")
-    # Publicar el mensaje
-    future = publisher.publish(topic_path, data_bytes)
-    print(f"Enviando mensaje: {data_bytes}")
-    return future.result()
+parser.add_argument(
+                '--project_id',
+                required=True,
+                help='GCP cloud project name.')
+parser.add_argument(
+                '--topic_name',
+                required=True,
+                help='PubSub topic name.')
+
+args, opts = parser.parse_known_args()
 
 
+class PubSubMessages:
 
-def extraer_datos_kml(ruta_carpeta, car_id):
-    # Elige de manera random el KML de la carpeta 'Rutas'
-    archivos_kml = [archivo for archivo in os.listdir(ruta_carpeta) if archivo.endswith('.kml')]
-    archivo_seleccionado = random.choice(archivos_kml)
-    file_path = os.path.join(ruta_carpeta, archivo_seleccionado)
+    """ Publish Messages in our PubSub Topic """
 
-    # Procesa el archivo KML seleccionado
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+    def __init__(self, project_id: str, topic_name: str):
+        self.publisher = pubsub_v1.PublisherClient()
+        self.project_id = project_id
+        self.topic_name = topic_name
 
-    namespace = {'kml': 'http://www.opengis.net/kml/2.2'}
+    def publishMessages(self, message: str):
+        json_str = json.dumps(message)
+        topic_path = self.publisher.topic_path(self.project_id, self.topic_name)
+        self.publisher.publish(topic_path, json_str.encode("utf-8"))
+        logging.info("A New person has been monitored. Id: %s", message['persona_id'])
 
-    route_id = os.path.basename(file_path).split('.')[0]  # Usar el nombre del archivo como identificador de ruta
-
-    for placemark in root.findall(".//kml:Placemark", namespace):
-        for line_string in placemark.findall(".//kml:LineString", namespace):
-            for coord in line_string.find(".//kml:coordinates", namespace).text.split():
-                lon, lat = coord.split(',')[:2]  # Ignorar la altitud
-                # Publicar cada par de coordenadas como un mensaje en Pub/Sub, incluyendo los identificadores
-                publicar_coordenada((float(lat), float(lon)), car_id, route_id)
-                time.sleep(0.4)
-
-                    
+    def __exit__(self):
+        self.publisher.transport.close()
+        logging.info("PubSub Client closed.")
 
 
-# Ejemplo de cómo llamar a la función para diferentes coches
-#extraer_datos_kml(ruta_carpeta="./Rutas", car_id="coche_1")
-#extraer_datos_kml(ruta_carpeta="./Rutas", car_id="coche_2")
-# Añade más llamadas según sea necesario para más coches y rutas
+class coche:
+    def publicar_coordenada(project_id: str, topic_name: str):
+        try:
+            publisher = PubSubMessages(project_id, topic_name)
+            
+            with open("resultados_coordenadas.json", 'r') as json_file:
+                lista_resultados = json.load(json_file)
 
-# Crear y empezar los hilos para diferentes coches
-h_coche1 = threading.Thread(target=extraer_datos_kml, args=("./Rutas", "coche_1"))
-h_coche2 = threading.Thread(target=extraer_datos_kml, args=("./Rutas", "coche_2"))
+            archivo_seleccionado = random.choice(lista_resultados)
+            
+            for i in range(2):
+                plazas_disponibles = random.randint(1,4)
+                precio_distancia = round(random.uniform(0.05, 0.3),2)
 
-h_coche1.start()
-h_coche2.start()
+                lista_coord = archivo_seleccionado['coordenadas']
+                for coord in lista_coord:
+                     coordenadas = coord
+                     coche_id = f"coche_{i+1}"
+                     ruta_id = archivo_seleccionado['numero_ruta']
+                     punto_inicio = archivo_seleccionado['punto_inicio']
+                     punto_destino = archivo_seleccionado['punto_destino']
 
-# Esperar a que ambos hilos terminen
-h_coche1.join()
-h_coche2.join()
+                     coche_payload = {
+                        "coche_id": coche_id,
+                        "ruta_id": ruta_id,
+                        "punto_inicio": punto_inicio,
+                        "punto_destino": punto_destino,
+                        "coordenadas": coordenadas,
+                        "plazas_disponibles": plazas_disponibles,
+                        "precio_distancia": precio_distancia
+                        }
+                     print(f'datos generados:{coche_payload}')
+
+                     publisher.publishMessages(coche_payload)
+
+        except Exception as err:
+            logging.error("Error while inserting car into the PubSub Topic: %s", err)
+
+
+
+def run_generator(project_id: str, topic_name: str):
+
+    while True:
+
+        # Get Vehicle Data
+        threads = []
+        num_threads = 2
+        
+        for i in range(num_threads):
+        
+            # Create Concurrent threads to simulate the random movement of vehicles.
+            thread = threading.Thread(target=coche.publicar_coordenada, args=(project_id,topic_name))
+            threads.append(thread)
+
+        for thread in threads:
+            thread.start()
+
+        # Simulate randomness
+        time.sleep(random.uniform(1, 10))
+
+if __name__ == "__main__":
+    
+    # Set Logs
+    logging.getLogger().setLevel(logging.INFO)
+    
+    # Run Generator
+    run_generator(
+        args.project_id, args.topic_name)
+
+# cambiar estructura tabla en GCP y en pipeline.py

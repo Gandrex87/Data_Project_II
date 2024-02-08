@@ -46,7 +46,7 @@ def extraer_datos_kml(ruta_carpeta, output_file):
 
     return "Proceso completado"
 
-output_file = "./Data_Project_II/Data_project_2/resultados_coordenadas.json"
+output_file = "./resultados_coordenadas.json"
 
 # Ruta de la carpeta que contiene los archivos KML (en la terminal hay que estar en la carpeta DATA_PROJECT_II que contiene las carpetas 'Data_Project_II' y 'Rutas')
 ruta_carpeta = "./Rutas"

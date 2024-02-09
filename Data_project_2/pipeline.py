@@ -83,7 +83,7 @@ def run():
             | "Parse JSON messages" >> beam.Map(ParsePubSubMessage)
             | "Format Message" >> beam.Map(format_message)
             | "Write to BigQuery" >> beam.io.WriteToBigQuery(
-                table = "data-project-23:dataproject2.personas", # Required Format: PROJECT_ID:DATASET.TABLE
+                table = "data-project-33-413616:dataset_33.tabla_33", # Required Format: PROJECT_ID:DATASET.TABLE
                 schema='persona_id:INTEGER, nombre:STRING, punto_inicio:STRING, punto_destino:STRING, presupuesto:FLOAT', # Required Format: field:TYPE
                 create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                 write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND

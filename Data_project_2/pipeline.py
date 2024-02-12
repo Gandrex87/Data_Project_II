@@ -93,7 +93,6 @@ def run():
     with beam.Pipeline(argv=pipeline_opts,options=options) as p:
 
         """ Part 01: Read data from PubSub. """
-
         messages_topic1 = (
             p
             | "Read People From PubSub Topic 1" >> beam.io.ReadFromPubSub(subscription=args.input_subscription1)

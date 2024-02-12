@@ -13,4 +13,3 @@ google-apitools==0.5.32
 google-cloud-bigquery==3.13.0
 pandas==1.5.3
 protobuf==3.20.3
-

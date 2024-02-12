@@ -61,7 +61,7 @@ class persona:
         return coord_individuales
 
     
-def caracteristicas(project_id: str, topic_name: str):
+    def caracteristicas(project_id: str, topic_name: str):
             try:
                 pubsub_class = PubSubMessages(project_id, topic_name)
                 with open("resultados_coordenadas.json", 'r') as json_file:
@@ -82,7 +82,7 @@ def caracteristicas(project_id: str, topic_name: str):
                     # Obtener el índice del punto de inicio
                     indice_inicio = lista_coord.index(punto_inicio) 
                     print(f'indice punto inicio: {indice_inicio}')
-                    
+
                     # Seleccionar un índice aleatorio mayor o igual al índice del punto de inicio
                     indice_destino = random.randint(indice_inicio + 1, len(lista_coord) - 1)
                     punto_destino = lista_coord[indice_destino]

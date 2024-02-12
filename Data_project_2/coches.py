@@ -38,7 +38,7 @@ class PubSubMessages:
         json_str = json.dumps(message)
         topic_path = self.publisher.topic_path(self.project_id, self.topic_name)
         self.publisher.publish(topic_path, json_str.encode("utf-8"))
-        logging.info("A New person has been monitored. Id: %s", message['persona_id'])
+        logging.info("A New vehicle has been monitored. Id: %s", message['coche_id'])
 
     def __exit__(self):
         self.publisher.transport.close()
@@ -72,7 +72,7 @@ class coche:
                         "ruta_id": ruta_id,
                         "punto_inicio": punto_inicio,
                         "punto_destino": punto_destino,
-                        "coordenadas": coordenadas,
+                        "coordenadas": str(coordenadas),
                         "plazas_disponibles": plazas_disponibles,
                         "precio_distancia": precio_distancia
                         }

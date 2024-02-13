@@ -46,6 +46,7 @@ class PubSubMessages:
 
 
 class persona:
+
     def coordenadas_separadas():
         with open("resultados_coordenadas.json", 'r') as json_file:
             lista_resultados = json.load(json_file)
@@ -58,17 +59,35 @@ class persona:
                 coord_individuales.append(str(coord))
             
         return coord_individuales
+
     
     def caracteristicas(project_id: str, topic_name: str):
             try:
                 pubsub_class = PubSubMessages(project_id, topic_name)
+                with open("resultados_coordenadas.json", 'r') as json_file:
+                    lista_resultados = json.load(json_file)
                 
                 for i in range(5):
+                    archivo_seleccionado = random.choice(lista_resultados)
+                    lista_coord = archivo_seleccionado['coordenadas']
+                
+
                     persona_id = random.randint(10000000, 99999999) 
                     nombre = fake.name()
-                    punto_inicio = str(random.choice(persona.coordenadas_separadas()))
-                    punto_destino = str(random.choice(persona.coordenadas_separadas()))
                     presupuesto = round(random.uniform(0.5, 30), 2)
+
+
+                    punto_inicio = random.choice(lista_coord)
+
+                    # Obtener el índice del punto de inicio
+                    indice_inicio = lista_coord.index(punto_inicio) 
+                    print(f'indice punto inicio: {indice_inicio}')
+
+                    # Seleccionar un índice aleatorio mayor o igual al índice del punto de inicio
+                    indice_destino = random.randint(indice_inicio + 1, len(lista_coord) - 1)
+                    punto_destino = lista_coord[indice_destino]
+                    print(f'indice punto destino: {indice_destino}')
+
 
                     persona_payload = {
                         'persona_id': persona_id,
@@ -79,10 +98,10 @@ class persona:
                     }
                     print(persona_payload)
 
-                    pubsub_class.publishMessages(persona_payload)
+                pubsub_class.publishMessages(persona_payload)
             
             except Exception as err:
-                logging.error("Error while inserting person into the PubSub Topic: %s", err)
+                logging.error("Error while inserting person: %s", err)
 
 def run_generator(project_id: str, topic_name: str):
 
@@ -112,3 +131,5 @@ if __name__ == "__main__":
     # Run Generator
     run_generator(
         args.project_id, args.topic_name)
+
+# comprobar estructura tabla en GCP y en pipeline.py

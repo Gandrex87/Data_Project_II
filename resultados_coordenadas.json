@@ -1,0 +1,37 @@
+[
+    {
+        "numero_ruta": 1,
+        "punto_inicio": "Ciudad de las Artes y las Ciencias, Avinguda del Professor L\u00f3pez Pi\u00f1ero, Valencia",
+        "punto_destino": "EDEM Escuela de Empresarios, Pla\u00e7a de L'aigua, Valencia",
+        "coordenadas": [
+            [
+                39.45384,
+                -0.35199
+            ],
+            [
+                39.45383,
+                -0.35208
+            ],
+            [
+                39.45381,
+                -0.35218
+            ]
+        ]
+    },
+    {
+        "numero_ruta": 2,
+        "punto_inicio": "Fuente San Luis, Valencia",
+        "punto_destino": "Akuarela Playa, Carrer d'Eug\u00e8nia Vi\u00f1es, Valencia",
+        "coordenadas": [
+            [  -0.39411,
+                39.49267
+            ],
+            [
+                -0.39411,
+                39.49267
+            ]
+        ]
+    }
+ 
+    
+]

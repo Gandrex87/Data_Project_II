@@ -45,6 +45,7 @@ class PubSubMessages:
         logging.info("PubSub Client closed.")
 
 
+
 class coche:
     def publicar_coordenada(project_id: str, topic_name: str):
         try:
@@ -58,30 +59,42 @@ class coche:
             for i in range(2):
                 plazas_disponibles = random.randint(1,4)
                 precio_distancia = round(random.uniform(0.05, 0.3),2)
+                coche_id = f"coche_{i+1}"
+                ruta_id = archivo_seleccionado['numero_ruta']
+                punto_inicio = archivo_seleccionado['punto_inicio']
+                punto_destino = archivo_seleccionado['punto_destino']
+                trayectos_realizados = 0
+                personas_transportadas = 0
+                dinero_recaudado:float = 0.00
 
                 lista_coord = archivo_seleccionado['coordenadas']
                 for coord in lista_coord:
                      coordenadas = coord
-                     coche_id = f"coche_{i+1}"
-                     ruta_id = archivo_seleccionado['numero_ruta']
-                     punto_inicio = archivo_seleccionado['punto_inicio']
-                     punto_destino = archivo_seleccionado['punto_destino']
+                     lat = coordenadas[0]
+                     lon = coordenadas[1]
 
                      coche_payload = {
-                        "coche_id": coche_id,
-                        "ruta_id": ruta_id,
-                        "punto_inicio": punto_inicio,
-                        "punto_destino": punto_destino,
-                        "coordenadas": str(coordenadas),
-                        "plazas_disponibles": plazas_disponibles,
-                        "precio_distancia": precio_distancia
+                        'coche_id': coche_id,
+                        'ruta_id': ruta_id,
+                        'punto_inicio': punto_inicio,
+                        'punto_destino': punto_destino,
+                        'lat': float(lat),
+                        'lon': float(lon),
+                        'plazas_disponibles': plazas_disponibles,
+                        'precio_distancia': precio_distancia,
+                        'trayectos_realizados': trayectos_realizados,
+                        'personas_transportadas': personas_transportadas,
+                        'dinero_recaudado': dinero_recaudado
                         }
                      print(f'datos generados:{coche_payload}')
+                     #time.sleep(2)
 
                      publisher.publishMessages(coche_payload)
 
         except Exception as err:
             logging.error("Error while inserting car into the PubSub Topic: %s", err)
+
+
 
 
 

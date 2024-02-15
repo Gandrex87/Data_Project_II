@@ -41,9 +41,13 @@ def format_message_people(message):
     return {
         'persona_id': message['persona_id'],
         'nombre': message['nombre'],
-        'punto_inicio': message['punto_inicio'],
-        'punto_destino': message['punto_destino'],
-        'presupuesto': message['presupuesto']
+        'lat_inicio': message['lat_inicio'],
+        'lon_inicio': message['lon_inicio'],
+        'lat_destino': message['lat_destino'],
+        'lon_destino': message['lon_destino'],
+        'presupuesto': message['presupuesto'],
+        'viajes_realizados': message['viajes_realizados'],
+        'pagado': message['pagado']
     }
 
 def format_message_vehicles(message):
@@ -52,10 +56,15 @@ def format_message_vehicles(message):
         'ruta_id': message['ruta_id'],
         'punto_inicio': message['punto_inicio'],
         'punto_destino': message['punto_destino'],
-        'coordenadas': message['coordenadas'],
+        'lat': message['lat'],
+        'lon': message['lon'],
         'plazas_disponibles': message['plazas_disponibles'],
-        'precio_distancia': message['precio_distancia']
+        'precio_distancia': message['precio_distancia'],
+        'trayectos_realizados': message['trayectos_realizados'],
+        'personas_transportadas': message['personas_transportadas'],
+        'dinero_recaudado': message['dinero_recaudado']
     }
+
 
 """ Dataflow Process """
 
@@ -111,8 +120,8 @@ def run():
         (
             messages_topic1 
                 | "Write people to BigQuery" >> beam.io.WriteToBigQuery(
-                    table = "data-project-33-413616:dataset_33.personas", # Required Format: PROJECT_ID:DATASET.TABLE
-                    schema='persona_id:INTEGER, nombre:STRING, punto_inicio:STRING, punto_destino:STRING, presupuesto:FLOAT', # Required Format: field:TYPE
+                    table = "data-project-33-413616:dataproject2.personas_todas", # Required Format: PROJECT_ID:DATASET.TABLE
+                    schema='persona_id:INTEGER, nombre:STRING, lat_inicio:FLOAT, lon_inicio: FLOAT, lat_destino:FLOAT, lon_destino: FLOAT, presupuesto:FLOAT, viajes_realizados:INTEGER, pagado:FLOAT', # Required Format: field:TYPE
                     create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND
             )
@@ -121,8 +130,8 @@ def run():
         (
             messages_topic2 
                 | "Write vehicles to BigQuery" >> beam.io.WriteToBigQuery(
-                    table = "data-project-33-413616:dataset_33.coches", # Required Format: PROJECT_ID:DATASET.TABLE
-                    schema='coche_id:STRING, ruta_id:INTEGER, punto_inicio:STRING, punto_destino:STRING, coordenadas:STRING, plazas_disponibles:INTEGER, precio_distancia:FLOAT', # Required Format: field:TYPE
+                    table = "data-project-33-413616:dataproject.coches_todos", # Required Format: PROJECT_ID:DATASET.TABLE
+                    schema='coche_id:STRING, ruta_id:INTEGER, punto_inicio:STRING, punto_destino:STRING, lat:FLOAT, lon:FLOAT, plazas_disponibles:INTEGER, precio_distancia:FLOAT, trayectos_realizados:INTEGER, personas_transportadas:INTEGER, dinero_recaudado:FLOAT', # Required Format: field:TYPE
                     create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND
             )

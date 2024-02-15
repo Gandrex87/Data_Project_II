@@ -78,6 +78,8 @@ class persona:
 
 
                     punto_inicio = random.choice(lista_coord)
+                    lat_inicio = punto_inicio[0]
+                    lon_inicio = punto_inicio[1]
 
                     # Obtener el índice del punto de inicio
                     indice_inicio = lista_coord.index(punto_inicio) 
@@ -86,15 +88,22 @@ class persona:
                     # Seleccionar un índice aleatorio mayor o igual al índice del punto de inicio
                     indice_destino = random.randint(indice_inicio + 1, len(lista_coord) - 1)
                     punto_destino = lista_coord[indice_destino]
+                    lat_destino = punto_destino[0]
+                    lon_destino = punto_destino[1]
                     print(f'indice punto destino: {indice_destino}')
-
-
+                    viajes_realizados = 0
+                    pagado:float = 0.00
+    
                     persona_payload = {
                         'persona_id': persona_id,
                         'nombre': nombre,
-                        'punto_inicio': str(punto_inicio),
-                        'punto_destino': str(punto_destino),
-                        'presupuesto': presupuesto
+                        'lat_inicio': float(lat_inicio),
+                        'lon_inicio': float(lon_inicio),
+                        'lat_destino': float(lat_destino),
+                        'lon_destino': float(lon_destino),
+                        'presupuesto': presupuesto,
+                        'viajes_realizados': viajes_realizados,
+                        'pagado': pagado
                     }
                     print(persona_payload)
 

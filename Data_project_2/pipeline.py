@@ -7,6 +7,7 @@ from apache_beam.runners import DataflowRunner
 from apache_beam.options.pipeline_options import PipelineOptions
 import apache_beam.transforms.window as window
 from apache_beam.metrics import Metrics
+from apache_beam.io.gcp.bigquery import WriteToBigQuery, BigQueryDisposition
 
 
 # Import Common Libraries
@@ -130,7 +131,7 @@ def run():
         (
             messages_topic2 
                 | "Write vehicles to BigQuery" >> beam.io.WriteToBigQuery(
-                    table = "data-project-33-413616:dataproject.coches_todos", # Required Format: PROJECT_ID:DATASET.TABLE
+                    table = "data-project-33-413616:dataproject2.coches_todos", # Required Format: PROJECT_ID:DATASET.TABLE
                     schema='coche_id:STRING, ruta_id:INTEGER, punto_inicio:STRING, punto_destino:STRING, lat:FLOAT, lon:FLOAT, plazas_disponibles:INTEGER, precio_distancia:FLOAT, trayectos_realizados:INTEGER, personas_transportadas:INTEGER, dinero_recaudado:FLOAT', # Required Format: field:TYPE
                     create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND

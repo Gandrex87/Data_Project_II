@@ -136,9 +136,15 @@ def print_data(element):
     print("Datos finales enviados a BigQuery:", element)
     return element
 
+def precio_recorrido_persona(coche, persona):
+    recorrido = haversine(persona['lat_inicio'], persona['lon_inicio'], persona['lat_destino'], persona['lon_destino'])
+    precio_recorrido = round(recorrido * coche['precio_distancia'], 2)
+
+    return precio_recorrido
+
 """ Dataflow Process """
 
-DISTANCIA_MAXIMA=3
+DISTANCIA_MAXIMA=0
 class BuscarCoincidenciasFn(beam.DoFn):
     def process(self, element, *args, **kwargs):
         _, datos_agrupados = element
@@ -147,24 +153,49 @@ class BuscarCoincidenciasFn(beam.DoFn):
 
         coincidencias = []
         for coche in coches:
-            for persona in personas:
-                distance = haversine(coche['lat'], coche['lon'], persona['lat_inicio'], persona['lon_inicio'])
+            if coche['plazas_disponibles'] > 0:
+                for persona in personas:
+                    #distance = haversine(coche['lat'], coche['lon'], persona['lat_inicio'], persona['lon_inicio'])
+                    precio_trayecto_persona = precio_recorrido_persona(coche, persona)
 
-                if distance <= DISTANCIA_MAXIMA:
-                    logging.info(f"Coincidencia encontrada: Coche {coche['coche_id']} y Persona {persona['persona_id']} a una distancia de {distance:.2f} km")
-                    coincidencia = {
-                        'coche_id': coche['coche_id'],
-                        'destino_coche': coche['punto_destino'],
-                        'plazas_disponibles': coche['plazas_disponibles'],
-                        'persona_id': persona['persona_id'],
-                        'distanceDelPasajero': distance
-                    }
-                    coincidencias.append(coincidencia)
+                    if coche['lat'] == persona['lat_inicio'] and coche['lon'] == persona['lon_inicio']:
+                        if precio_trayecto_persona < persona['presupuesto']:
+                    
+                            logging.info(f"Coincidencia encontrada: Coche {coche['coche_id']} y Persona {persona['persona_id']} en la ruta {coche['ruta_id']}")
+                            coche['plazas_disponibles'] -= 1
+                            coche['personas_transportadas'] += 1
+                            coche['dinero_recaudado'] += precio_trayecto_persona
+                            persona['viajes_realizados'] += 1
+                            persona['pagado'] += precio_trayecto_persona
 
-        # Selecciona la coincidencia más cercana (menor distancia)
-        if coincidencias:
-            coincidencia_seleccionada = min(coincidencias, key=lambda x: x['distanceDelPasajero'])
-            yield coincidencia_seleccionada
+                            coincidencia = {
+                                'coche_id': coche['coche_id'],
+                                'destino_coche': coche['punto_destino'],
+                                'plazas_disponibles': coche['plazas_disponibles'],
+                                'persona_id': persona['persona_id'],
+                                #'distanceDelPasajero': distance, 
+                                'precio_trayecto': precio_trayecto_persona,
+                                'personas_transportadas': coche['personas_transportadas']
+                            }
+                            coincidencias.append(coincidencia)
+
+                        else:
+                            logging.info(f"La persona {persona['persona_id']} no está dispuesta a pagar tanto por el trayecto.")
+
+                    if coche['lat'] == persona['lat_destino'] and coche['lon'] == persona['lon_destino']:
+                        logging.info(f"La persona {persona['persona_id']} ha llegado a su destino")
+                        break
+
+            else:
+                logging.info(f"El coche {coche['coche_id']} no tiene más plazas disponibles")
+                break
+        
+               
+
+                # # Selecciona la coincidencia más cercana (menor distancia)
+                # if coincidencias:
+                #     coincidencia_seleccionada = min(coincidencias, key=lambda x: x['distanceDelPasajero'])
+                #     yield coincidencia_seleccionada
 
 def run():
 
@@ -253,7 +284,7 @@ def run():
         
         #coincidencias | 'Debug Print' >> beam.Map(debug_print)
         coincidencias | 'Print Data' >> beam.Map(print_data)
-        schema = 'coche_id:STRING, destino_coche:STRING, plazas_disponibles:INTEGER, persona_id:STRING, distanceDelPasajero:FLOAT'
+        schema = 'coche_id:STRING, destino_coche:STRING, plazas_disponibles:INTEGER, persona_id:STRING, distanceDelPasajero:FLOAT, precio_trayecto:FLOAT, personas_transportadas:INTEGER'
         coincidencias | "Escribir en BigQuery" >> beam.io.WriteToBigQuery(
                 table='data-project-33-413616:dataproject2.matches',
                 schema=schema,

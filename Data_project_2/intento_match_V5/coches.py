@@ -54,12 +54,13 @@ class coche:
             with open("resultados_coordenadas.json", 'r') as json_file:
                 lista_resultados = json.load(json_file)
 
-            archivo_seleccionado = random.choice(lista_resultados)
+            i = 0
+            while i <= 5:
+                archivo_seleccionado = random.choice(lista_resultados)
             
-            for i in range(2):
                 plazas_disponibles = random.randint(1,4)
                 precio_distancia = round(random.uniform(0.05, 0.3),2)
-                coche_id = f"coche_{i+1}"
+                coche_id = (f"coche_{i+1}")
                 ruta_id = archivo_seleccionado['numero_ruta']
                 punto_inicio = archivo_seleccionado['punto_inicio']
                 punto_destino = archivo_seleccionado['punto_destino']
@@ -90,11 +91,10 @@ class coche:
                      #time.sleep(2)
 
                      publisher.publishMessages(coche_payload)
-
+                i += 1
+                
         except Exception as err:
             logging.error("Error while inserting car into the PubSub Topic: %s", err)
-
-
 
 
 
@@ -104,7 +104,7 @@ def run_generator(project_id: str, topic_name: str):
 
         # Get Vehicle Data
         threads = []
-        num_threads = 2
+        num_threads = 5
         
         for i in range(num_threads):
         
@@ -127,4 +127,3 @@ if __name__ == "__main__":
     run_generator(
         args.project_id, args.topic_name)
 
-# cambiar estructura tabla en GCP y en pipeline.py

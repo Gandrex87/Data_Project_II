@@ -20,13 +20,14 @@ Para llevar a cabo este proyecto hemos definido la siguiente arquitectura:
 
 Una vez los mensajes se han consumido por Dataflow, entran por un Pipeline que nos permite realizar match entre los coches y personas basados en su proximidad (max:4km).
 ## Jobs
-
+![Dataflow](Captura.png)
 
 
 
 Lo anterior genera una tabla en BQ (Matches) de la cual podemos hacer seguimiento del comportamiento, estadisticas y ocupacion de los coches en tiempo real
 
 ## BigQuery
+![Dataflow](CapturaII.png)
 
 
 

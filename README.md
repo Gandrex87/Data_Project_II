@@ -1,6 +1,6 @@
 # BlaBlaCar CityConnect
 
-Bla Bla Car ha decidido dar el salto a pelear en el mercado de los viajes de corta distancia. Para dar el salto a la reserva en tiempo real de desplazamientos urbanos ha elegido la ciudad de Valencia y a nuestro gran equipo para desarrollar la solución. 
+Bla Bla Car ha decidido dar el salto a pelear en el mercado de los viajes de corta distancia. Para lograr reservas en tiempo real de desplazamientos urbanos ha elegido la ciudad de Valencia y a nuestro gran equipo para desarrollar la solución. 
 El equipo está compuesto por Antonio Faura Vidaurre, Miguel Herrero Fuertes, Andrés Roncancio Salamanca e Inés Soler Soler.
 
 Para desarrollar el prototipo inicial se han creado datos ficticios tanto de los coches como de las personas participantes.
@@ -11,6 +11,22 @@ Un ejemplo de los mensajes de los coches, con sus características y estructura:
 Los mensajes de las personas se envían en el siguiente formato:
 > {'persona_id': 1103, 'nombre': 'Darío Figueroa', 'lat': 39.44267, 'lon': -0.37863, 'presupuesto': 19.9, 'timestamp': 1708275807.0106812}
 
+Para llevar a cabo este proyecto hemos definido la siguiente arquitectura:
 
 ## Arquitectura
 ![Arquitectura BlaBlaCar CityConnect](BlaBlaCar_architecture.jpg)
+
+
+
+Una vez los mensajes se han consumido por Dataflow, entran por un Pipeline que nos permite realizar match entre los coches y personas basados en su proximidad (max:4km).
+## Jobs
+
+
+
+
+Lo anterior genera una tabla en BQ (Matches) de la cual podemos hacer seguimiento del comportamiento, estadisticas y ocupacion de los coches en tiempo real
+
+## BigQuery
+
+
+

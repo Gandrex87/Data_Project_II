@@ -27,7 +27,7 @@ Una vez los mensajes se han consumido por Dataflow, entran por un Pipeline que n
 Lo anterior genera una tabla en BQ (Matches) de la cual podemos hacer seguimiento del comportamiento, estadisticas y ocupacion de los coches en tiempo real
 
 ## BigQuery
-![Dataflow](CapturaII.png)
+![Dataflow](captura_bigquery.png)
 
 
 

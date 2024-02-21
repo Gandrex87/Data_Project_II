@@ -264,11 +264,11 @@ def run():
         coincidencias | 'Print Data' >> beam.Map(print_data)
         schema = 'car_id:STRING, destino_coche:STRING, plazas_disponibles:INTEGER, persona_id:STRING, distanceDelPasajero:FLOAT, precio_por_viaje:FLOAT, personas_transportadas:INTEGER, timestamp:FLOAT'
         coincidencias | "Escribir en BigQuery" >> WriteToBigQuery(
-                 table='midataset_coches.matches',
+                 table='data-project-33-413616.dataprojectg4.matches',
                  schema=schema,
                  create_disposition=BigQueryDisposition.CREATE_IF_NEEDED,
                  write_disposition=BigQueryDisposition.WRITE_APPEND,
-                 project='civic-summer-413119'
+                 project='data-project-33-413616'
              )
     
         

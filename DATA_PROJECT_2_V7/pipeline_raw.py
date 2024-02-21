@@ -44,8 +44,7 @@ def format_message_people(message):
         'nombre': message['nombre'],
         'lat': message['lat'],
         'lon': message['lon'],
-        'presupuesto': message['presupuesto'],
-        'timestamp': message['timestamp']
+        'presupuesto': message['presupuesto']
     }
 
 
@@ -56,8 +55,7 @@ def format_message_vehicles(message):
         'lat': message['lat'],
         'lon': message['lon'],
         'plazas_disponibles': message['plazas_disponibles'],
-        'personas_transportadas': message['personas_transportadas'],
-        'timestamp': message['timestamp']
+        'personas_transportadas': message['personas_transportadas']
     }
 
 
@@ -116,7 +114,7 @@ def run():
             personas
                 | "Write people to BigQuery" >> beam.io.WriteToBigQuery(
                     table = "data-project-33-413616:dataprojectg4.personas_todas", # Required Format: PROJECT_ID:DATASET.TABLE
-                    schema='persona_id:STRING, nombre:STRING, lat:FLOAT, lon: FLOAT, presupuesto:FLOAT, timestamp:FLOAT', # Required Format: field:TYPE
+                    schema='persona_id:STRING, nombre:STRING, lat:FLOAT, lon: FLOAT, presupuesto:FLOAT', # Required Format: field:TYPE
                     create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND
             )
@@ -126,7 +124,7 @@ def run():
             coches
                 | "Write vehicles to BigQuery" >> beam.io.WriteToBigQuery(
                     table = "data-project-33-413616:dataprojectg4.coches_todos", # Required Format: PROJECT_ID:DATASET.TABLE
-                    schema='car_id:STRING, destino_coche:STRING, lat:FLOAT, lon:FLOAT, plazas_disponibles:INTEGER, personas_transportadas:INTEGER, timestamp:FLOAT', # Required Format: field:TYPE
+                    schema='car_id:STRING, destino_coche:STRING, lat:FLOAT, lon:FLOAT, plazas_disponibles:INTEGER, personas_transportadas:INTEGER', # Required Format: field:TYPE
                     create_disposition=beam.io.BigQueryDisposition.CREATE_NEVER,
                     write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND
             )

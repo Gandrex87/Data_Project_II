@@ -14,3 +14,5 @@ proto-plus==1.23.0
 pandas==1.5.3
 protobuf==3.20.3
 DateTime==5.4
+dash
+db_dtypes

@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 # Configura tus credenciales de BigQuery
-client = bigquery.Client
+client = bigquery.Client()
 
 # Inicializa la aplicación Dash
 app = dash.Dash(__name__)
@@ -21,7 +21,7 @@ fig.update_layout(
     mapbox_style="open-street-map",
     mapbox_zoom=12,
     mapbox_center={"lat": 39.4699, "lon": -0.3763},  # Coordenadas aproximadas de Valencia
-    height=800,  # Altura del mapa en píxeles
+    height=900,  # Altura del mapa en píxeles
     width=1200    # Anchura del mapa en píxeles
 )
 
@@ -30,7 +30,6 @@ def get_route_data():
     query = """
     SELECT *
     FROM `data-project-33-413616.dataprojectg4.coches_todos`
-    ORDER BY car_id, timestamp ASC
     """
     query_job = client.query(query)
     results = query_job.result()
@@ -41,11 +40,6 @@ def get_person_data(last_index, limit=10):
     query = f"""
     SELECT *
     FROM `data-project-33-413616.dataprojectg4.personas_todas`
-    WHERE persona_id NOT IN (
-        SELECT persona_id
-        FROM `data-project-33-413616.dataprojectg4.matches2`
-    )
-    ORDER BY persona_id
     """
     query_job = client.query(query)
     results = query_job.result()
@@ -55,7 +49,7 @@ def get_person_data(last_index, limit=10):
 def get_matched_person_ids():
     query = """
     SELECT persona_id
-    FROM `data-project-33-413616.dataprojectg4.matches2`
+    FROM `data-project-33-413616.dataprojectg4.matches`
     """
     query_job = client.query(query)
     results = query_job.result()
@@ -65,13 +59,18 @@ def get_matched_person_ids():
 # Función para obtener los nuevos matches desde el último tiempo de verificación
 def get_new_matches(last_check_time):
     query = f"""
-    SELECT car_id, persona_id
-    FROM `data-project-33-413616.dataprojectg4.matches2`
-    WHERE timestamp > '{last_check_time}'
+    SELECT m.car_id, m.persona_id, m.plazas_disponibles, p.nombre
+    FROM `data-project-33-413616.dataprojectg4.matches` AS m
+    INNER JOIN `data-project-33-413616.dataprojectg4.personas_todas` AS p
+    ON m.persona_id = p.persona_id
+    WHERE m.timestamp > '{last_check_time}'
     """
     query_job = client.query(query)
     results = query_job.result()
-    return [(row.car_id, row.persona_id) for row in results]
+    return [{'car_id': row.car_id, 
+             'persona_id': row.persona_id,
+             'plazas_disponibles': row.plazas_disponibles,
+             'nombre': row.nombre} for row in results]
 
 # Define el layout de la aplicación Dash
 app.layout = html.Div([
@@ -88,7 +87,7 @@ app.layout = html.Div([
     ),
     dcc.Interval(
         id='interval-component',
-        interval=50000,  # Intervalo ajustado a 50 segundos para el ejemplo
+        interval=2000,  # Intervalo ajustado a 50 segundos para el ejemplo
         n_intervals=0
     )
 ])
@@ -138,24 +137,11 @@ def update_map(n_intervals):
                     mode="lines+markers",
                     lon=car_df['lon'],
                     lat=car_df['lat'],
-                    text=[f"{car_id}"] * len(car_df), 
+                    text=[f"{car_id}<br>Pasajeros: {car_df.iloc[-1].get('nombre', '')}"] * len(car_df),
                     hoverinfo="text",
                     marker={'size': 5},
                     line={'width': 5},
                     name=f'Ruta {car_id}',
-                    showlegend=False
-                ))
-
-                # Añadir un marcador especial para la posición actual del coche
-                hover_text = f"{car_id} - Viaje: {destino_coche}"
-                fig.add_trace(go.Scattermapbox(
-                    mode="markers",
-                    lon=[car_df.iloc[-1]['lon']],
-                    lat=[car_df.iloc[-1]['lat']],
-                    marker={'size': 10, 'color': 'orange'},
-                    text=[hover_text],  # Establece el texto personalizado aquí
-                    hoverinfo="text",  # Muestra solo el texto personalizado al pasar el cursor
-                    name=f'Posición actual {car_id}',
                     showlegend=False
                 ))
                 
@@ -172,29 +158,47 @@ def update_map(n_intervals):
                 ))
                 
                 # Marcador de destino para esta ruta
+                # fig.add_trace(go.Scattermapbox(
+                #     mode="markers+text",
+                #     lon=[car_df['lon'].iloc[-1]],
+                #     lat=[car_df['lat'].iloc[-1]],
+                #     text=["Destino"],
+                #     textposition="bottom right",
+                #     marker={'size': 12, 'color': 'red'},
+                #     hoverinfo='text',
+                #     showlegend=False
+                # ))
+
+                # Añadir un marcador especial para la posición actual del coche
+                hover_text = f"{car_id}<br>Viaje: {destino_coche}<br>Pasajeros: {car_df.iloc[-1].get('nombre', '')}<br>Plazas disponibles: {car_df.iloc[-1]['plazas_disponibles']}"
                 fig.add_trace(go.Scattermapbox(
-                    mode="markers+text",
-                    lon=[car_df['lon'].iloc[-1]],
-                    lat=[car_df['lat'].iloc[-1]],
-                    text=["Destino"],
-                    textposition="bottom right",
-                    marker={'size': 12, 'color': 'red'},
-                    hoverinfo='text',
+                    mode="markers",
+                    lon=[car_df.iloc[-1]['lon']],
+                    lat=[car_df.iloc[-1]['lat']],
+                    marker={'size': 8, 'color': 'orange'},
+                    text=[hover_text],  
+                    hoverinfo="text",  
+                    name=f'Posición actual {car_id}',
                     showlegend=False
                 ))
-        
-        # Añade marcadores para las personas
-        for _, row in df_personas_filtered.iterrows():
-            fig.add_trace(go.Scattermapbox(
-                mode="markers+text",
-                lon=[row['lon']],
-                lat=[row['lat']],
-                marker={'size': 10, 'color': 'purple'},
-                text=[row['nombre']], 
-                textposition="bottom right",
-                hoverinfo='text',
-                showlegend=False  
-            ))
+                
+        print(f"Personas filtradas para mostrar: {len(df_personas_filtered)}")
+
+        # Añade marcadores para las personas si la columna 'nombre' está presente
+        if 'nombre' in df_personas_filtered.columns:
+            for _, row in df_personas_filtered.iterrows():
+                hover_text = f"Nombre: {row['nombre']}<br>Presupuesto disponible: {row['presupuesto']}"
+                fig.add_trace(go.Scattermapbox(
+                    mode="markers+text",
+                    lon=[row['lon']],
+                    lat=[row['lat']],
+                    marker={'size': 10, 'color': 'purple'},
+                    text=[row['nombre']], 
+                    hoverinfo='text',
+                    hovertext=hover_text,
+                    textposition="bottom right",
+                    showlegend=False  
+                ))
 
         fig.update_layout(
             mapbox_style="open-street-map",
@@ -209,6 +213,7 @@ def update_map(n_intervals):
         )
         return fig
     return dash.no_update
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

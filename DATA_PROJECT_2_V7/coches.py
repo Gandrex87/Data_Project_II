@@ -8,7 +8,7 @@ import random
 
 # Configura el cliente de Pub/Sub
 publisher = pubsub_v1.PublisherClient()
-topic_path = publisher.topic_path('civic-summer-413119', 'pro-bucket1')
+topic_path = publisher.topic_path('data-project-33-413616', 'input2-coches')
 
 def publicar_coordenada(coordenada, car_id, route_id):
     message_data = {
@@ -67,10 +67,6 @@ h_coche31 = threading.Thread(target=extraer_datos_kml, args=("coche_31",))
 h_coche32 = threading.Thread(target=extraer_datos_kml, args=("coche_32",))
 h_coche33 = threading.Thread(target=extraer_datos_kml, args=("coche_33",))
 h_coche34 = threading.Thread(target=extraer_datos_kml, args=("coche_34",))
-h_coche35 = threading.Thread(target=extraer_datos_kml, args=("coche_35",))
-h_coche36 = threading.Thread(target=extraer_datos_kml, args=("coche_36",))
-h_coche37 = threading.Thread(target=extraer_datos_kml, args=("coche_37",))
-h_coche38 = threading.Thread(target=extraer_datos_kml, args=("coche_38",))
 
 
 h_coche1.start()
@@ -87,23 +83,10 @@ h_coche20.start()
 h_coche21.start()
 h_coche22.start()
 h_coche23.start()
-time.sleep(1)
 h_coche24.start()
 h_coche25.start()
 h_coche30.start()
 h_coche31.start()
-time.sleep(2)
 h_coche32.start()
 h_coche33.start()
 h_coche34.start()
-h_coche35.start()
-time.sleep(2)
-h_coche36.start()
-h_coche37.start()
-h_coche38.start()
-
-
-
-
-
-

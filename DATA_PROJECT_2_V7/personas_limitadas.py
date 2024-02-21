@@ -89,59 +89,45 @@ class PubSubMessages:
 
 
 class persona:
+    persona_id_counter = 1100
+    # Modificamos para que genere solo 50 personas en total
+    total_personas_generadas = 0  # Nuevo contador para el total de personas generadas
+
     def caracteristicas(project_id: str, topic_name: str):
+        global total_personas_generadas  # Referencia a la variable global para mantener la cuenta
+
         try:
             pubsub_class = PubSubMessages(project_id, topic_name)
             
-            for i in range(4):
-                # Selecciona un punto aleatorio de la lista de puntos
+            while persona.total_personas_generadas < 50:  # Condición modificada para limitar a 50 personas
                 punto_aleatorio = random.choice(puntos)
-                lat, lon = punto_aleatorio  # Desempaqueta la latitud y longitud
+                lat, lon = punto_aleatorio
 
-                persona_id = random.randint(1100, 1105)
+                persona_id = persona.persona_id_counter
+                persona.persona_id_counter += 1
+
                 nombre = fake.name()
                 presupuesto = round(random.uniform(0.5, 20), 1)
 
                 persona_payload = {
                     'persona_id': persona_id,
                     'nombre': nombre,
-                    'lat': lat,  # Usa la latitud del punto seleccionado
-                    'lon': lon,  # Usa la longitud del punto seleccionado
-                    'presupuesto': presupuesto,
-                    'timestamp': time.time()
+                    'lat': lat,
+                    'lon': lon,
+                    'presupuesto': presupuesto
                 }
-                print(persona_payload)
 
                 pubsub_class.publishMessages(persona_payload)
+                persona.total_personas_generadas += 1  # Incrementa el contador de personas generadas
 
         except Exception as err:
             logging.error("Error while inserting person into the PubSub Topic: %s", err)
 
 def run_generator(project_id: str, topic_name: str):
-
-    while True:
-
-        # Get Vehicle Data
-        threads = []
-        num_threads = 1
-        
-        for i in range(num_threads):
-        
-            # Create Concurrent threads to simulate the random movement of vehicles.
-            thread = threading.Thread(target=persona.caracteristicas, args=(project_id,topic_name))
-            threads.append(thread)
-
-        for thread in threads:
-            thread.start()
-
-        # Simulate randomness
-        time.sleep(random.uniform(1, 3))
+    # Modificación para no usar hilos ya que solo generaremos 50 personas en total
+    caracteristicas(project_id, topic_name)  # Llama directamente a generar 50 personas
 
 if __name__ == "__main__":
-    
-    # Set Logs
+    # Configuración de logging y ejecución
     logging.getLogger().setLevel(logging.INFO)
-    
-    # Run Generator
-    run_generator(
-        args.project_id, args.topic_name)
+    run_generator(args.project_id, args.topic_name)
